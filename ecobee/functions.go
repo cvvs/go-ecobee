@@ -26,8 +26,10 @@ import (
 	"github.com/golang/glog"
 )
 
-const thermostatAPIURL = `https://api.ecobee.com/1/thermostat`
-const thermostatSummaryURL = `https://api.ecobee.com/1/thermostatSummary`
+const (
+	thermostatAPIURL     = `https://api.ecobee.com/1/thermostat`
+	thermostatSummaryURL = `https://api.ecobee.com/1/thermostatSummary`
+)
 
 func (c *Client) UpdateThermostat(utr UpdateThermostatRequest) error {
 	j, err := json.Marshal(&utr)
@@ -139,7 +141,7 @@ func (c *Client) GetThermostatSummary(selection Selection) (map[string]Thermosta
 
 	glog.V(1).Infof("GetThermostatSummary response: %#v", r)
 
-	var tsm = make(ThermostatSummaryMap, r.ThermostatCount)
+	tsm := make(ThermostatSummaryMap, r.ThermostatCount)
 
 	for i := 0; i < r.ThermostatCount; i++ {
 		rl := strings.Split(r.RevisionList[i], ":")
@@ -148,9 +150,12 @@ func (c *Client) GetThermostatSummary(selection Selection) (map[string]Thermosta
 		}
 
 		// Assume order of RevisionList and StatusList is the same.
-		es, err := buildEquipmentStatus(r.StatusList[i])
-		if err != nil {
-			return nil, fmt.Errorf("error in buildEquipmentSTatus(%v): %v", r.StatusList[i], err)
+		var es EquipmentStatus
+		if selection.IncludeEquipmentStatus {
+			es, err = buildEquipmentStatus(r.StatusList[i])
+			if err != nil {
+				return nil, fmt.Errorf("error in buildEquipmentSTatus(%v): %v", r.StatusList[i], err)
+			}
 		}
 
 		connected, err := strconv.ParseBool(rl[2])
@@ -174,7 +179,6 @@ func (c *Client) GetThermostatSummary(selection Selection) (map[string]Thermosta
 }
 
 func (c *Client) get(endpoint string, rawRequest []byte) ([]byte, error) {
-
 	glog.V(2).Infof("get(%s?json=%s)", endpoint, rawRequest)
 	request := url.QueryEscape(string(rawRequest))
 	resp, err := c.Get(fmt.Sprintf("%s?json=%s", endpoint, request))
@@ -223,7 +227,6 @@ func buildEquipmentStatus(input string) (EquipmentStatus, error) {
 }
 
 func (es *EquipmentStatus) Set(field string, state bool) {
-
 	switch field {
 	case "heatPump":
 		es.HeatPump = state
@@ -256,5 +259,4 @@ func (es *EquipmentStatus) Set(field string, state bool) {
 	case "auxHotWater":
 		es.AuxHotWater = state
 	}
-
 }
