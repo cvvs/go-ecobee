@@ -1,9 +1,10 @@
-module github.com/rspier/go-ecobee
+module github.com/cvvs/go-ecobee
 
 require (
 	github.com/golang/glog v1.2.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/prometheus/client_golang v1.19.0
+	github.com/rspier/go-ecobee v0.0.0-20240413234714-b622870a781a
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
